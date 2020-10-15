@@ -1,0 +1,30 @@
+{
+  "name": "goit-node-js-hw",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KalinkinaD/goit-node-js-hw.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KalinkinaD/goit-node-js-hw/issues"
+  },
+  "homepage": "https://github.com/KalinkinaD/goit-node-js-hw#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.5",
+    "uuid": "^8.3.1",
+    "yargs": "^16.0.3"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
