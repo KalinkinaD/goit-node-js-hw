@@ -1,3 +1,3 @@
-const Server = require("./api/app");
+const Server = require("./contacts/app");
 
 new Server().start();

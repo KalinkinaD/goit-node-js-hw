@@ -4,7 +4,6 @@ const {
   getContactById,
   addContact,
   removeContact,
-
   updateContact,
 } = require("./contacts");
 
