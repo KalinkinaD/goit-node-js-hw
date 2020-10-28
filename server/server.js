@@ -11,6 +11,7 @@ async function listContacts() {
     throw err;
   }
 }
+
 function getContactById(contactId) {
   return require(contactsPath).find((contact) => contact.id == contactId);
 }
@@ -25,6 +26,7 @@ async function removeContact(contactId) {
     throw err;
   }
 }
+
 async function addContact(name, email, phone) {
   try {
     const contactList = require(contactsPath);
@@ -42,6 +44,7 @@ async function addContact(name, email, phone) {
     throw err;
   }
 }
+
 async function updateContact(contactId, udateData) {
   try {
     const contactList = require(contactsPath);

@@ -1,6 +1,5 @@
 const express = require("express");
 const ContactController = require("./contact.controller");
-
 const router = express.Router();
 
 router.get("/", ContactController.getUsers);
@@ -27,7 +26,7 @@ router.get(
 
 router.delete(
   "/:id",
-  ContactController.checkDataExist,
+  ContactController.checkUserInList,
   ContactController.deleteUser
 );
 
