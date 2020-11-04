@@ -6,7 +6,7 @@ const contactRouter = require("./contacts/contact.router");
 
 require("dotenv").config();
 
-const PORT = process.env.PORT || 7000;
+const PORT = process.env.PORT || 4567;
 
 module.exports = class Server {
   constructor() {
