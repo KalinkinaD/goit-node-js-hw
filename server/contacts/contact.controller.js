@@ -4,6 +4,14 @@ const {
   Types: { ObjectId },
 } = require("mongoose");
 
+const options = {
+  page: 1,
+  limit: 4,
+  collation: {
+    subscription: "free",
+  },
+};
+
 module.exports = class ContactController {
   static async getUsers(req, res, next) {
     try {
@@ -12,6 +20,27 @@ module.exports = class ContactController {
     } catch (err) {
       next(err);
     }
+  }
+
+  static async getOptionalList(req, res, next) {
+    try {
+      const { limit, page, sub } = req.query;
+      if (limit && page) {
+        const options = { limit, page };
+        const contacts = await contactModel.paginate({}, options);
+        return res.status(200).json(contacts.docs);
+      }
+      if (sub) {
+        const query = { subscription: sub };
+        const options = { limit: 20, page: 1 };
+        const contacts = await contactModel.paginate( query, options)
+        return res.status(200).json(contacts.docs);
+      }
+      next()
+    }
+catch(err) {
+  next(err);
+}
   }
 
   static async getUserById(req, res, next) {

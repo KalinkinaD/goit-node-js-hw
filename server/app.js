@@ -3,6 +3,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 const contactRouter = require("./contacts/contact.router");
+const usersRouter = require("./users/users.router");
 
 require("dotenv").config();
 
@@ -15,7 +16,8 @@ module.exports = class Server {
   async start() {
     this.server = express();
     this.initMiddleware();
-    this.initRouters();
+    this.initUserRoutes();
+    this.initContactsRoutes();
     await this.initDataBase();
     this.listen();
   }
@@ -24,7 +26,10 @@ module.exports = class Server {
     this.server.use(express.json());
     this.server.use(morgan("dev"));
   }
-  initRouters() {
+  initUserRoutes() {
+    this.server.use("/", usersRouter);
+  }
+  initContactsRoutes() {
     this.server.use("/contacts", contactRouter);
   }
   async initDataBase() {
