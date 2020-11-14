@@ -1,7 +1,8 @@
 const Joi = require("joi");
 const bcrpt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("./UsersSchema");
+const { generateFromString } = require("generate-avatar");
+const User = require("./users.schema");
 const { findUser, hashPassword, updateToken } = require("./users.helpers");
 
 require("dotenv").config();
@@ -10,21 +11,24 @@ module.exports = class UserController {
   static async register(req, res, next) {
     try {
       const { email, password } = req.body;
-      const userExist = await findUser(email);
-      if (!userExist) {
-        const newUser = await User.create({
-          email,
-          password: await hashPassword(password),
-        });
-        return res.status(201).json({
-          user: {
-            email: newUser.email,
-            subscription: newUser.subscription,
-          },
-        });
+      const userExist = await User.findOne({ email });
+      if (userExist) {
+        return res.status(409).send("Email in use");
       }
-      return res.status(409).json({ message: "Email in use" });
+      const avatarURL = "http://localhost:3000/images/" + req.file.filename;
+      const newUser = await User.create({
+        email,
+        password: await hashPassword(password),
+        avatarURL,
+      });
+      return res.status(201).send({
+        user: {
+          email: newUser.email,
+          subscription: newUser.subscription,
+        },
+      });
     } catch (err) {
+      console.log(err);
       next(err);
     }
   }
@@ -40,7 +44,7 @@ module.exports = class UserController {
         return res.status(401).json({ message: "Email or password is wrong" });
       }
       const token = await jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: 2 * 24 * 60 * 60,
+        expiresIn: "1d",
       });
       updateToken(user._id, token);
       return res.status(200).json({
@@ -57,7 +61,7 @@ module.exports = class UserController {
   static async logout(req, res, next) {
     try {
       const { _id } = req.user;
-      const findU = await User.findByIdAndUpdate(
+      await User.findByIdAndUpdate(
         _id,
         {
           $set: {
@@ -66,7 +70,7 @@ module.exports = class UserController {
         },
         {
           new: true,
-        }
+        },
       );
       return res.status(204).send("No Content");
     } catch (err) {
@@ -79,6 +83,7 @@ module.exports = class UserController {
       return res.status(200).json({
         email: user.email,
         subscription: user.subscription,
+        avatarURL: user.avatarURL,
       });
     } catch (err) {
       next(err);
@@ -97,20 +102,16 @@ module.exports = class UserController {
   }
   static async updateCurrent(req, res, next) {
     try {
-      const user = await User.findByIdAndUpdate(
-        req.params.id,
-        {
-          $set: req.body,
-        },
-        { new: true }
-      );
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+      const newAvatarUrl = "http://localhost:3000/images/" + req.file.filename;
+      const id = req.user.id;
+      req.user.avatarURL = newAvatarUrl;
+      const updateUser = await User.findByIdAndUpdate(id, req.user);
+      if (!updateUser) {
+        res.status(400).send({ message: "Not found" });
       }
-      return res.status(200).json({
-        email: user.email,
-        subscription: user.subscription,
-      });
+      res
+        .status(200)
+        .send({ message: "User info is update", avatarURL: newAvatarUrl });
     } catch (err) {
       next(err);
     }
@@ -135,5 +136,36 @@ module.exports = class UserController {
     } catch (err) {
       next(err);
     }
+  }
+  static async createAvatarURL(req, res, next) {
+    if (req.file) {
+      return next();
+    }
+    try {
+      const randomAtribut = (Math.random() * (100 - 10) + 100).toString();
+      const pathFolderTmp = "tmp";
+      const dataAvatar = await generateFromString(randomAtribut);
+      const filename = `avatar-${Date.now()}.svg`;
+      await fsPromises.writeFile(pathFolderTmp + "/" + filename, dataAvatar);
+
+      req.file = {
+        destination: pathFolderTmp,
+        filename,
+        path: path.join(pathFolderTmp + "/" + filename),
+      };
+      next();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  static subscrType(req, res, next) {
+    const createSubscrRules = Joi.object({
+      subscription: Joi.string().valid("free", "pro", "premium"),
+    });
+    const result = createSubscrRules.validate(req.body);
+    if (result.error) {
+      return res.status(400).send(result.error.details);
+    }
+    next();
   }
 };

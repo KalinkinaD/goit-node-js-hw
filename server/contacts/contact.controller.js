@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const contactModel = require("./contactSchema");
+const contactModel = require("./contact.schema");
 const {
   Types: { ObjectId },
 } = require("mongoose");
@@ -33,14 +33,13 @@ module.exports = class ContactController {
       if (sub) {
         const query = { subscription: sub };
         const options = { limit: 20, page: 1 };
-        const contacts = await contactModel.paginate( query, options)
+        const contacts = await contactModel.paginate(query, options);
         return res.status(200).json(contacts.docs);
       }
-      next()
+      next();
+    } catch (err) {
+      next(err);
     }
-catch(err) {
-  next(err);
-}
   }
 
   static async getUserById(req, res, next) {
