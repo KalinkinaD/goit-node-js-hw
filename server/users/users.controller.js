@@ -1,6 +1,8 @@
 const Joi = require("joi");
 const bcrpt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { promises: fsPromises } = require("fs");
+const path = require("path");
 const { generateFromString } = require("generate-avatar");
 const User = require("./users.schema");
 const { findUser, hashPassword, updateToken } = require("./users.helpers");
