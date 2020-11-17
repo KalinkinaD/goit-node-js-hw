@@ -102,18 +102,21 @@ module.exports = class UserController {
   }
   static async updateCurrent(req, res, next) {
     try {
+      const user = req.user;
       const newAvatarUrl = "http://localhost:3000/images/" + req.file.filename;
-      const id = req.user.id;
-      req.user.avatarURL = newAvatarUrl;
-      const updateUser = await User.findByIdAndUpdate(id, req.user);
-      if (!updateUser) {
-        res.status(400).send({ message: "Not found" });
-      }
-      res
-        .status(200)
-        .send({ message: "User info is update", avatarURL: newAvatarUrl });
+      await User.findByIdAndUpdate(
+        user._id,
+        {
+          avatarURL: newAvatarUrl,
+        },
+        {
+          new: true,
+        }
+      );
+      res.status(200).json(`avatarURL: ${avatarURL}`)
+      next();
     } catch (err) {
-      next(err);
+      res.status(500).send(err.message);
     }
   }
   static async authorize(req, res, next) {
