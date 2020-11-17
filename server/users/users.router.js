@@ -7,7 +7,7 @@ const usersRouter = Router();
 usersRouter.post(
   "/users/register",
   UserController.validate,
-  UserHelpers.upload.single('avatar'),
+  UserHelpers.upload.single("avatar"),
   UserController.createAvatarURL,
   UserHelpers.minifyImage,
   UserController.register,
@@ -34,15 +34,23 @@ usersRouter.get(
 usersRouter.patch(
   "/users/:id",
   UserController.authorize,
+  UserController.subscrType,
   UserController.updateCurrent,
 );
 
+//Update avatar
 usersRouter.patch(
   "/users/avatar",
   UserController.authorize,
   UserHelpers.upload.single("avatar"),
   UserHelpers.minifyImage,
   UserController.updateCurrent,
+);
+
+//User`s mail verification
+usersRouter.get(
+  "/auth/verify/:verificationToken",
+  UserController.verificateMail,
 );
 
 module.exports = usersRouter;

@@ -4,6 +4,7 @@
     "description": "NodeS HW",
     "main": "index.js",
     "dependencies": {
+        "@sendgrid/mail": "^7.4.0",
         "bcrypt": "^5.0.0",
         "canvas": "^2.6.1",
         "cors": "^2.8.5",

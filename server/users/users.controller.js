@@ -2,24 +2,31 @@ const Joi = require("joi");
 const bcrpt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { generateFromString } = require("generate-avatar");
+const { v4: uuidv4 } = require("uuid");
+const { promises: fsPromises } = require("fs");
+const path = require("path");
 const User = require("./users.schema");
 const { findUser, hashPassword, updateToken } = require("./users.helpers");
+const sendMail = require("../sendgrid");
 
 require("dotenv").config();
 
 module.exports = class UserController {
   static async register(req, res, next) {
     try {
+      const verificationToken = uuidv4();
       const { email, password } = req.body;
       const userExist = await User.findOne({ email });
       if (userExist) {
         return res.status(409).send("Email in use");
       }
+      await sendMail(email, verificationToken);
       const avatarURL = "http://localhost:3000/images/" + req.file.filename;
       const newUser = await User.create({
         email,
         password: await hashPassword(password),
         avatarURL,
+        verificationToken,
       });
       return res.status(201).send({
         user: {
@@ -111,9 +118,9 @@ module.exports = class UserController {
         },
         {
           new: true,
-        }
+        },
       );
-      res.status(200).json(`avatarURL: ${avatarURL}`)
+      res.status(200).json(`avatarURL: ${avatarURL}`);
       next();
     } catch (err) {
       res.status(500).send(err.message);
@@ -170,5 +177,22 @@ module.exports = class UserController {
       return res.status(400).send(result.error.details);
     }
     next();
+  }
+  static async verificateMail(req, res, next) {
+    try {
+      const verificationToken = req.params.verificationToken;
+      const user = await User.findOneAndUpdate(
+        { verificationToken },
+        {
+          verificationToken: null,
+        },
+      );
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      return res.json({ message: "Email Verificated " });
+    } catch (err) {
+      next(err);
+    }
   }
 };
