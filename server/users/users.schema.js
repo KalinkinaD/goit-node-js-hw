@@ -6,12 +6,18 @@ const UserSchema = new Schema({
         require: true, },
     password: { type: String,
         require: true, },
+    avatarURL: {
+            type: String,
+            required: true
+          },
     subscription: {
       type: String,
       enum: ["free", "pro", "premium"],
       default: "free"
     },
-    token: String  
-})
+    token: String,
+},
+{ versionKey: false }
+)
 
 module.exports = mongoose.model('User', UserSchema);

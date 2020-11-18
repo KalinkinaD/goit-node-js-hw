@@ -24,6 +24,7 @@ module.exports = class Server {
   initMiddleware() {
     this.server.use(cors());
     this.server.use(express.json());
+    this.server.use('/images', express.static('public/images'));
     this.server.use(morgan("dev"));
   }
   initUserRoutes() {
